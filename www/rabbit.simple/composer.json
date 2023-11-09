@@ -1,0 +1,28 @@
+{
+    "name": "foxdev/docker.rabbit.api",
+    "description": "API Controller",
+    "authors": [
+        {
+            "name": "Bogdan Sazonov",
+            "email": "mamaama141996@gmail.com"
+        }
+    ],
+    "require": {
+        "php-amqplib/php-amqplib": "^3.6",
+        "vlucas/phpdotenv": "^5.5"
+    },
+    "autoload": {
+        "files": [
+            "config.php"
+        ],
+        "psr-4": {
+            "App\\": "lib/App"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "civicrm/composer-compile-plugin": true,
+            "php-http/discovery": true
+        }
+    }
+}

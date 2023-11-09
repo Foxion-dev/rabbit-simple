@@ -1,0 +1,16 @@
+FROM php:8.2-cli
+
+# Install SUPERVISOR
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends supervisor \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN docker-php-ext-configure pcntl --enable-pcntl \
+    && docker-php-ext-install pcntl mysqli sockets
+
+COPY ./images/php/php.ini /etc/php/8.2/cli/conf.d/90-php.ini
+
+# Set USER
+RUN useradd -ms /bin/bash worker
+USER worker
+WORKDIR /var/www

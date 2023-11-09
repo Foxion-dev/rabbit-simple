@@ -1,0 +1,77 @@
+version: '2'
+
+networks:
+  net:
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: ./images/nginx/dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./www:/var/www
+      - ./logs:/var/log/nginx
+    networks:
+      - net
+    depends_on:
+      - php
+  rabbitmq:
+    build:
+      dockerfile: ./images/rabbitmq/dockerfile
+    hostname: rabbitmq
+    restart: always
+    environment:
+      - AMQP_URL='amqp://rabbitmq?connection_attempts=5&retry_delay=5'
+      - RABBITMQ_DEFAULT_USER=rmuser
+      - RABBITMQ_DEFAULT_PASS=rmpassword
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit log_levels [{connection,error},{default,error}] disk_free_limit 2147483648
+    volumes:
+      - ./rabbitmq:/var/lib/rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - net
+  php:
+    build:
+      context: .
+      dockerfile: ./images/php/dockerfile
+    volumes:
+      - ./www:/var/www
+    networks:
+      - net
+    depends_on:
+      - mysql
+  mysql:
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    networks:
+      - net
+  worker:
+    build:
+      context: .
+      dockerfile: ./images/worker/dockerfile
+    volumes:
+      - ./www:/var/www
+      - ./images/worker/conf/supervisord.conf:/etc/supervisor/supervisord.conf
+      - ./images/worker/conf/workers:/etc/supervisor/conf.d/
+    command: [ "supervisord", "-c", "/etc/supervisor/supervisord.conf" ]
+    networks:
+      - net
+    depends_on:
+      - mysql
+      - rabbitmq
+      - php
+      - nginx
+

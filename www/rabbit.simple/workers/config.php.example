@@ -1,0 +1,2 @@
+<?php
+$_SERVER["DOCUMENT_ROOT"] = '/var/www/rabbit.simple';

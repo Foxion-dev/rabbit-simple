@@ -1,0 +1,7 @@
+/.idea
+/rabbitmq
+/mysql
+/www/rabbit.simple/workers/config.php
+/www/rabbit.simple/vendor
+.env
+*.log
